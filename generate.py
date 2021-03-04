@@ -11,6 +11,7 @@ from skimage import img_as_ubyte
 import torch
 from sync_batchnorm import DataParallelWithCallback
 
+# from pytorch2keras.converter import pytorch_to_keras
 # imageio.plugins.ffmpeg.download()
 from modules.generator import OcclusionAwareGenerator
 from modules.keypoint_detector import KPDetector
@@ -125,7 +126,6 @@ def generate(source_image, driving_video, result_video):
     source_img = resize(source_image, (256, 256))[..., :3]
     driving_vid = [resize(frame, (256, 256))[..., :3] for frame in drive_vid]
     generator, kp_detector = load_checkpoints(config_path=CONFIG, checkpoint_path=CHECKPOINT, cpu=CPU)
-
     if FIND_BEST_FRAME:
         i = find_best_frame(source_img, driving_vid, cpu=CPU)
         print ("Best frame: " + str(i))
@@ -152,6 +152,10 @@ def generateNew(source_image, drive_vid, result_video, fps):
     driving_vid = [resize(frame, (256, 256))[..., :3] for frame in drive_vid]
     generator, kp_detector = load_checkpoints(config_path=CONFIG, checkpoint_path=CHECKPOINT, cpu=CPU)
 
+    # source = torch.tensor(source_img[np.newaxis].astype(np.float32)).permute(0, 3, 1, 2)
+    # driving = torch.tensor(np.array(driving_vid)[np.newaxis].astype(np.float32)).permute(0, 4, 1, 2, 3)
+    # driving_frame = driving[:, :, 0]
+    # torch.onnx.export(generator, (source,kp_detector(driving_frame),  kp_detector(source)), 'onnx_model_generator.onnx', verbose=True)
     if FIND_BEST_FRAME:
         i = find_best_frame(source_img, driving_vid, cpu=CPU)
         print ("Best frame: " + str(i))

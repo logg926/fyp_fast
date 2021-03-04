@@ -14,11 +14,6 @@ import json
 
 
 source_image = np.array(cv2.imread('./erik.jpeg'))
-
-print(source_image.dtype)
-
-source_image = np.array(source_image.tolist(), dtype = "uint8")
-print(source_image.shape)
 # cv2.imwrite('output.jpg', source_image)
 reader = imageio.get_reader('./damedaneshort.mp4')
 fps = reader.get_meta_data()['fps']

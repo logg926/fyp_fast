@@ -48,7 +48,7 @@ def azimuthalAverage(image, center=None):
 
     return radial_prof
 
-def transformFrame(frame, size=300):
+def transformFrame(img, size=300):
   f_transform = np.fft.fft2(img)
   fshift = np.fft.fftshift(f_transform)
   magnitude_spectrum = 20*np.log(np.abs(fshift))
@@ -59,17 +59,15 @@ def transformFrame(frame, size=300):
   interpolated /= interpolated[0]
   return interpolated
 
-img = cv2.imread('aamjfukxwp_0.jpg', 0)
-print (img)
+# img = cv2.imread('aamjfukxwp_0.jpg', 0)
+# print (img)
 
-import json
-# json.dumps({ "source_image": img})
-with open('imgtestfrequencydomain.json', 'w') as f:
-    json.dump({ "source_image": img.tolist()}, f)
-size = 300
-feature = transformFrame(img, size)
+# with open('imgtestfrequencydomain.json', 'w') as f:
+#     json.dump({ "detectimg": img.tolist()}, f)
+# size = 300
+# feature = transformFrame(img, size)
 
-import pickle
-SVM = pickle.load(open('./SVM model_v0.24.1.pkl', 'rb'))
-print(SVM)
-print(SVM.predict(np.array([feature])))
+# import pickle
+# SVM = pickle.load(open('./SVM model_v0.24.1.pkl', 'rb'))
+# print(SVM)
+# print(SVM.predict(np.array([feature])))

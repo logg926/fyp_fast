@@ -64,6 +64,6 @@ size = 300
 feature = transformFrame(img, size)
 
 import pickle
-SVM = pickle.load(open('./SVM model.pkl', 'rb'))
+SVM = pickle.load(open('./SVM model_v0.24.1.pkl', 'rb'))
 print(SVM)
 print(SVM.predict(np.array([feature])))

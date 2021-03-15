@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from generate import generateNew 
+from testfrequencydomain import transformFrame
 import imageio
 import numpy as np
 from typing import List, Optional
@@ -15,10 +16,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+import pickle
 app = FastAPI()
 
 # = dataclasses.field(default_factory=lambda: [[[[0]]]])
 
+SVM = pickle.load(open('./SVM model_v0.24.1.pkl', 'rb'))
+size = 300
 @app.get("/")
 def read_root():
     # source_image = np.array(imageio.imread('./erik.jpeg'))
@@ -53,6 +57,9 @@ class GenearateObj(BaseModel):
     drivevid: List[List[List[List[int]]]] 
     fps: int
 
+class TestObj(BaseModel):
+    detectimg: List[List[List[int]]] 
+
 @app.post("/gen")
 def read_item(item: GenearateObj):
     source_image = np.array(item.sourceimg, dtype = "uint8")
@@ -67,17 +74,11 @@ def read_item(item: GenearateObj):
     return JSONResponse(content=json.dumps(response))
 
 @app.post("/svm_test")
-def read_item(item: GenearateObj):
-    source_image = np.array(item.sourceimg, dtype = "uint8")
-    drive_vid = np.asarray(item.drivevid, dtype = "uint8")
-    fps = item.fps
-    result = generateNew(source_image, drive_vid, './result_erik5.mp4', fps)
-    print(type(result[0]))
-    response = []
-    for res in result:
-        response.append(res.tolist())
-    # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
-    return JSONResponse(content=json.dumps(response))
+def svm_test(item: TestObj):
+    img = np.array(item.detectimg, dtype = "uint8")
+    feature = transformFrame(img, size)
+    prediction = SVM.predict(np.array([feature]))
+    return JSONResponse(content=json.dumps(prediction))
 
 
 @app.get("/items/{item_id}")

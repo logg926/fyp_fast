@@ -60,6 +60,12 @@ def transformFrame(frame, size=300):
   return interpolated
 
 img = cv2.imread('aamjfukxwp_0.jpg', 0)
+print (img)
+
+import json
+# json.dumps({ "source_image": img})
+with open('imgtestfrequencydomain.json', 'w') as f:
+    json.dump({ "source_image": img.tolist()}, f)
 size = 300
 feature = transformFrame(img, size)
 

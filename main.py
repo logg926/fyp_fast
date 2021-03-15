@@ -60,18 +60,18 @@ class GenearateObj(BaseModel):
 class TestObj(BaseModel):
     detectimg: List[List[List[int]]] 
 
-@app.post("/gen")
-def read_item(item: GenearateObj):
-    source_image = np.array(item.sourceimg, dtype = "uint8")
-    drive_vid = np.asarray(item.drivevid, dtype = "uint8")
-    fps = item.fps
-    result = generateNew(source_image, drive_vid, './result_erik5.mp4', fps)
-    print(type(result[0]))
-    response = []
-    for res in result:
-        response.append(res.tolist())
-    # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
-    return JSONResponse(content=json.dumps(response))
+# @app.post("/gen")
+# def read_item(item: GenearateObj):
+#     source_image = np.array(item.sourceimg, dtype = "uint8")
+#     drive_vid = np.asarray(item.drivevid, dtype = "uint8")
+#     fps = item.fps
+#     result = generateNew(source_image, drive_vid, './result_erik5.mp4', fps)
+#     print(type(result[0]))
+#     response = []
+#     for res in result:
+#         response.append(res.tolist())
+#     # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
+#     return JSONResponse(content=json.dumps(response))
 
 @app.post("/svm_test")
 def svm_test(item: TestObj):

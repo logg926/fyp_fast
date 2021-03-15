@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from generate import generateNew 
 from testfrequencydomain import transformFrame
-import imageio
+# import imageio
 import numpy as np
 from typing import List, Optional
 from pydantic import BaseModel

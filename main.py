@@ -7,6 +7,7 @@ import imageio
 import numpy as np
 from typing import List, Optional
 from pydantic import BaseModel
+from Capsule-Forensics-v2.test_vid_function import detect
 import dataclasses
 import json
 from pydantic.dataclasses import dataclass
@@ -80,8 +81,17 @@ def svm_test(item: TestObj):
     prediction = SVM.predict(np.array([feature]))
     return JSONResponse(content=json.dumps(prediction.tolist()))
 
+@app.post("/capsule_test")
+def svm_test(item: TestObj):
+    img = np.array(item.detectimg, dtype = "uint8")
+    cls, prob = detect(img)
+    return JSONResponse(content=json.dumps(prob))
+
+
 
 
 @app.get("/items/{item_id}")
 def new(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
+
+

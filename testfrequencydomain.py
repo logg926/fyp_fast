@@ -50,6 +50,7 @@ def azimuthalAverage(image, center=None):
 
 def transformFrame(img, size=300):
   f_transform = np.fft.fft2(img)
+  # print(f_transform)
   fshift = np.fft.fftshift(f_transform)
   magnitude_spectrum = 20*np.log(np.abs(fshift))
   psd1D = azimuthalAverage(magnitude_spectrum)
@@ -60,10 +61,16 @@ def transformFrame(img, size=300):
   return interpolated
 
 # img = cv2.imread('aamjfukxwp_0.jpg', 0)
-# print (img)
 
-# with open('imgtestfrequencydomain.json', 'w') as f:
-#     json.dump({ "detectimg": img.tolist()}, f)
+# dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
+# print(np.float32(img))
+# f_transform = np.fft.fft2(img)
+# # print(f_transform)
+# # 0 = cv2.IMREAD_GRAYSCALE
+# # print (img)
+
+# # with open('imgtestfrequencydomain.json', 'w') as f:
+# #     json.dump({ "detectimg": img.tolist()}, f)
 # size = 300
 # feature = transformFrame(img, size)
 

@@ -54,10 +54,8 @@ def read_root():
     # # with open('test.json', 'w') as f:
     # #     json.dump({ "sourceimg": source_image, "drivevid": drive_vid, "fps": 24}, f, cls=NumpyEncoder)
     # # # print(drive_vid)
-
     # # print(drive_vid.shape)
     # generateNew(source_image, drive_vid, './result_erik6.mp4', fps)
-
     return JSONResponse(content=json.dumps([[[[0]]]]))
 
 

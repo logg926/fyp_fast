@@ -68,6 +68,9 @@ class GenearateObj(BaseModel):
 class TestObj(BaseModel):
     detectimg: List[List[int]]
 
+class TestCapObj(BaseModel):
+    detectvid: List[List[List[List[int]]]] 
+
 @app.post("/gen")
 def read_item(item: GenearateObj):
     source_image = np.array(item.sourceimg, dtype = "uint8")
@@ -89,9 +92,18 @@ def svm_test(item: TestObj):
     return JSONResponse(content=json.dumps(prediction.tolist()))
 
 @app.post("/capsule_test")
-def svm_test(item: TestObj):
-    img = np.array(item.detectimg, dtype = "uint8")
-    cls, prob = detect(img)
+def svm_test(item: TestCapObj):
+    # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
+    vid = np.array(item.detectvid, dtype = "uint8")
+    cls, prob = detect(vid)
     return JSONResponse(content=json.dumps(prob))
 
 

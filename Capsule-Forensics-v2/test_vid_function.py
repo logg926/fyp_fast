@@ -170,30 +170,49 @@ def findRange(frame, dimension, faceCenter):
     return frame[startRow:startRow+dimension, startCol:startCol+dimension]
 
 def classify_frames(vgg_ext, model, vid):
-    if not vid:
-        # place holder logic for testing with detect dataset, reset to throw error in production
-        frames = []
-        videoDir = '../test_dataset/real/sqqamveljk.mp4'
-        reader = imageio.get_reader(videoDir, fps=5)
-        try:
-            for im in reader:
-                frames.append(im)
-        except RuntimeError:
-            pass
-        reader.close()
+    
+    # place holder logic for testing with detect dataset, reset to throw error in production
+    
+    # videoDir = './test_dataset/real/sqqamveljk.mp4'
+    # videoDir = vid
+    # reader = imageio.get_reader(videoDir, fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
 
-        frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in frames]
-        return classify_batch(vgg_ext, model, frames)
-    else:
-        frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in vid]
-        return classify_batch(vgg_ext, model, frames)
+    frames = vid
 
-def detect(vid=''):
+    frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in frames]
+    return classify_batch(vgg_ext, model, frames)
+    # if not vid:
+    #     # place holder logic for testing with detect dataset, reset to throw error in production
+    #     frames = []
+    #     videoDir = './test_dataset/real/sqqamveljk.mp4'
+    #     reader = imageio.get_reader(videoDir, fps=5)
+    #     try:
+    #         for im in reader:
+    #             frames.append(im)
+    #     except RuntimeError:
+    #         pass
+    #     reader.close()
+
+    #     frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in frames]
+    #     return classify_batch(vgg_ext, model, frames)
+    # else:
+    #     frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in vid]
+    #     return classify_batch(vgg_ext, model, frames)
+
+def detect(vid):
     vgg_ext = model_big.VggExtractor()
     model = model_big.CapsuleNet(2)
     GPU = -1
     MODEL_ID = 8
-    MODEL_PATH = '../Capsule-Forensics-v2/checkpoints/binary_faceforensicspp_v2_full/capsule_' + str(MODEL_ID) +'.pt'
+    MODEL_PATH = './Capsule-Forensics-v2/checkpoints/binary_faceforensicspp_v2_full/capsule_' + str(MODEL_ID) +'.pt'
 
     if GPU < 0:
         # print('here')
@@ -206,10 +225,21 @@ def detect(vid=''):
         vgg_ext.cuda(GPU)
         model.cuda(GPU)
 
+
     cls, prob = classify_frames(vgg_ext, model, vid)
     
     return cls, prob
 
 if __name__ == '__main__':
-    cls, prob = detect()
+    vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    frames = []
+    reader = vid
+    try:
+        for im in reader:
+            frames.append(im)
+    except RuntimeError:
+        pass
+    reader.close()
+    print(frames)
+    cls, prob = detect(frames)
     print(('Real', prob) if cls == 0 else ('Fake', prob))

@@ -1,2 +1,3 @@
 first-order-motion-model/*
 vox-cpk.pth.tar
+ensemble-cnn/weights/*

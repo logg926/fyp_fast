@@ -211,3 +211,72 @@ class VideoReaderIspl(VideoReader):
         result = self._read_frames_at_indices(path, capture, frame_idxs)
         capture.release()
         return result
+
+def read_frames_new( path, num_frames, jitter=0, seed=None):
+        assert num_frames > 0
+
+        capture = cv2.VideoCapture(path)
+        frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        if frame_count <= 0: return None
+
+        frame_idxs = np.linspace(0, frame_count - 1, num_frames, endpoint=True, dtype=np.int)
+        frame_idxs = np.unique(frame_idxs)  # Avoid repeating frame idxs otherwise it breaks reading
+        if jitter > 0:
+            np.random.seed(seed)
+            jitter_offsets = np.random.randint(-jitter, jitter, len(frame_idxs))
+            frame_idxs = np.clip(frame_idxs + jitter_offsets, 0, frame_count - 1)
+
+        # result = self._read_frames_at_indices(path, capture, frame_idxs)
+        result = _read_frames_at_indices_new(path, capture, frame_idxs)
+        capture.release()
+        return result
+def _read_frames_at_indices_new( path, capture, frame_idxs):
+    verbose = True
+    try:
+        frames = []
+        idxs_read = []
+        for frame_idx in range(frame_idxs[0], frame_idxs[-1] + 1):
+            # Get the next frame, but don't decode if we're not using it.
+            ret = capture.grab()
+            if not ret:
+                if verbose:
+                    print("Error grabbing frame %d from movie %s" % (frame_idx, path))
+                break
+
+            # Need to look at this frame?
+            current = len(idxs_read)
+            if frame_idx == frame_idxs[current]:
+                ret, frame = capture.retrieve()
+                if not ret or frame is None:
+                    if verbose:
+                        print("Error retrieving frame %d from movie %s" % (frame_idx, path))
+                    break
+
+                frame = _postprocess_frame_new(frame)
+                frames.append(frame)
+                idxs_read.append(frame_idx)
+
+        if len(frames) > 0:
+            return np.stack(frames), idxs_read
+        if verbose:
+            print("No frames read from movie %s" % path)
+        return None
+    except:
+        if verbose:
+            print("Exception while reading movie %s" % path)
+        return None
+
+def _postprocess_frame_new( frame):
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    insets=(0, 0)
+    if insets[0] > 0:
+        W = frame.shape[1]
+        p = int(W * insets[0])
+        frame = frame[:, p:-p, :]
+
+    if insets[1] > 0:
+        H = frame.shape[1]
+        q = int(H * insets[1])
+        frame = frame[q:-q, :, :]
+
+    return frame

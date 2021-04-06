@@ -101,54 +101,22 @@ class FaceExtractor:
             frame_dict['scores'] = new_scores
         return frame_dict
 
-    def process_videos(self, input_dir, filenames, video_idxs) -> List[dict]:
-        """For the specified selection of videos, grabs one or more frames
-        from each video, runs the face detector, and tries to find the faces
-        in each frame.
+    def video_begin_read(self, input_dir, filenames, video_idxs):
 
-        The frames are split into tiles, and the tiles from the different videos
-        are concatenated into a single batch. This means the face detector gets
-        a batch of size len(video_idxs) * num_frames * num_tiles (usually 3).
-
-        Arguments:
-            input_dir: base folder where the video files are stored
-            filenames: list of all video files in the input_dir
-            video_idxs: one or more indices from the filenames list; these
-                are the videos we'll actually process
-
-        Returns a list of dictionaries, one for each frame read from each video.
-
-        This dictionary contains:
-            - video_idx: the video this frame was taken from
-            - frame_idx: the index of the frame in the video
-            - frame_w, frame_h: original dimensions of the frame
-            - faces: a list containing zero or more NumPy arrays with a face crop
-            - scores: a list array with the confidence score for each face crop
-
-        If reading a video failed for some reason, it will not appear in the
-        output array. Note that there's no guarantee a given video will actually
-        have num_frames results (as soon as a reading problem is encountered for
-        a video, we continue with the next video).
-        """
         target_size = self.facedet.input_size
-
         videos_read = []
         frames_read = []
         frames = []
         tiles = []
         resize_info = []
-
         for video_idx in video_idxs:
             # Read the full-size frames from this video.
             filename = filenames[video_idx]
             video_path = os.path.join(input_dir, filename)
             result = self.video_read_fn(video_path)
-
             # Error? Then skip this video.
             if result is None: continue
-
             videos_read.append(video_idx)
-
             # Keep track of the original frames (need them later).
             my_frames, my_idxs = result
             frames.append(my_frames)
@@ -158,6 +126,66 @@ class FaceExtractor:
             my_tiles, my_resize_info = self._tile_frames(my_frames, target_size)
             tiles.append(my_tiles)
             resize_info.append(my_resize_info)
+        return videos_read, frames_read,frames,tiles,resize_info
+
+
+    def process_videos(self, input_dir, filenames, facedet, video_read_fn,result) -> List[dict]:
+        target_size = facedet.input_size
+
+        videos_read = []
+        frames_read = []
+        frames = []
+        tiles = []
+        resize_info = []
+        video_idx = 0
+        # filename = filenames[video_idx]
+        # video_path = os.path.join(input_dir, filename)
+        # result = video_read_fn(video_path)
+
+        # print(result)
+        
+        videos_read.append(video_idx)
+
+        # Keep track of the original frames (need them later).
+        my_frames, my_idxs = result
+        frames.append(my_frames)
+        frames_read.append(my_idxs)
+
+        # Split the frames into several tiles. Resize the tiles to 128x128.
+        my_tiles, my_resize_info = self._tile_frames(my_frames, target_size)
+
+        
+        ###
+        # frames = my_frames
+        # num_frames, H, W, _ = frames.shape
+        # # num_h, num_v, split_size, x_step, y_step = self.get_tiles_params(H, W)
+        # num_h, num_v, split_size, x_step, y_step = get_tiles_params_new(H, W)
+        # splits = np.zeros((num_frames * num_v * num_h, target_size[1], target_size[0], 3), dtype=np.uint8)
+        # i = 0
+        # for f in range(num_frames):
+        #     y = 0
+        #     for v in range(num_v):
+        #         x = 0
+        #         for h in range(num_h):
+        #             crop = frames[f, y:y + split_size, x:x + split_size, :]
+        #             splits[i] = cv2.resize(crop, target_size, interpolation=cv2.INTER_AREA)
+        #             x += x_step
+        #             i += 1
+        #         y += y_step
+        # resize_info = [split_size / target_size[0], split_size / target_size[1], 0, 0]
+        # # return splits, resize_info
+
+        # my_tiles = splits
+        # my_resize_info = resize_info
+        ###
+
+        # print(my_tiles)
+        print(my_resize_info)
+
+        tiles.append(my_tiles)
+        resize_info.append(my_resize_info)
+        # print(tiles)
+        # videos_read, frames_read,frames,tiles,resize_info = self.video_begin_read(input_dir, filenames, video_idxs)
 
         if len(tiles) == 0:
             return []
@@ -224,43 +252,11 @@ class FaceExtractor:
         return self.process_videos(input_dir, filenames, [0])
 
     def _tile_frames(self, frames: np.ndarray, target_size: Tuple[int, int]) -> (np.ndarray, List[float]):
-        """Splits each frame into several smaller, partially overlapping tiles
-        and resizes each tile to target_size.
-
-        After a bunch of experimentation, I found that for a 1920x1080 video,
-        BlazeFace works better on three 1080x1080 windows. These overlap by 420
-        pixels. (Two windows also work but it's best to have a clean center crop
-        in there as well.)
-
-        I also tried 6 windows of size 720x720 (horizontally: 720|360, 360|720;
-        vertically: 720|1200, 480|720|480, 1200|720) but that gives many false
-        positives when a window has no face in it.
-
-        For a video in portrait orientation (1080x1920), we only take a single
-        crop of the top-most 1080 pixels. If we split up the video vertically,
-        then we might get false positives again.
-
-        (NOTE: Not all videos are necessarily 1080p but the code can handle this.)
-
-        Arguments:
-            frames: NumPy array of shape (num_frames, height, width, 3)
-            target_size: (width, height)
-
-        Returns:
-            - a new (num_frames * N, target_size[1], target_size[0], 3) array
-              where N is the number of tiles used.
-            - a list [scale_w, scale_h, offset_x, offset_y] that describes how
-              to map the resized and cropped tiles back to the original image
-              coordinates. This is needed for scaling up the face detections
-              from the smaller image to the original image, so we can take the
-              face crops in the original coordinate space.
-        """
         num_frames, H, W, _ = frames.shape
 
-        num_h, num_v, split_size, x_step, y_step = self.get_tiles_params(H, W)
-
+        # num_h, num_v, split_size, x_step, y_step = self.get_tiles_params(H, W)
+        num_h, num_v, split_size, x_step, y_step = get_tiles_params_new(H, W)
         splits = np.zeros((num_frames * num_v * num_h, target_size[1], target_size[0], 3), dtype=np.uint8)
-
         i = 0
         for f in range(num_frames):
             y = 0
@@ -272,7 +268,6 @@ class FaceExtractor:
                     x += x_step
                     i += 1
                 y += y_step
-
         resize_info = [split_size / target_size[0], split_size / target_size[1], 0, 0]
         return splits, resize_info
 
@@ -468,3 +463,34 @@ class FaceExtractor:
     # crops with a confidence score lower than min_score
 
     # TODO: def sort_by_histogram(self, crops) for videos with 2 people.
+
+def get_tiles_params_new(H, W):
+    split_size = min(H, W, 720)
+    x_step = (W - split_size) // 2
+    y_step = (H - split_size) // 2
+    num_v = (H - split_size) // y_step + 1 if y_step > 0 else 1
+    num_h = (W - split_size) // x_step + 1 if x_step > 0 else 1
+    return num_h, num_v, split_size, x_step, y_step
+
+def _tile_frames_new(self, frames: np.ndarray, target_size: Tuple[int, int]) -> (np.ndarray, List[float]):
+    num_frames, H, W, _ = frames.shape
+
+    # num_h, num_v, split_size, x_step, y_step = self.get_tiles_params(H, W)
+    num_h, num_v, split_size, x_step, y_step = get_tiles_params_new(H, W)
+
+    splits = np.zeros((num_frames * num_v * num_h, target_size[1], target_size[0], 3), dtype=np.uint8)
+
+    i = 0
+    for f in range(num_frames):
+        y = 0
+        for v in range(num_v):
+            x = 0
+            for h in range(num_h):
+                crop = frames[f, y:y + split_size, x:x + split_size, :]
+                splits[i] = cv2.resize(crop, target_size, interpolation=cv2.INTER_AREA)
+                x += x_step
+                i += 1
+            y += y_step
+
+    resize_info = [split_size / target_size[0], split_size / target_size[1], 0, 0]
+    return splits, resize_info

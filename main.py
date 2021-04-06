@@ -17,6 +17,7 @@ import cv2
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from ensemble-cnn.predict import predict
 
 import pickle
 app = FastAPI()
@@ -106,7 +107,20 @@ def svm_test(item: TestCapObj):
     cls, prob = detect(vid)
     return JSONResponse(content=json.dumps(prob))
 
-
+@app.post("/cnn_test")
+def svm_test(item: TestCapObj):
+    # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
+    vid = np.array(item.detectvid, dtype = "uint8")
+    predict("../test_dataset/real/sqqamveljk.mp4", ["Xception"])
+    return JSONResponse(content=json.dumps(prob))
 
 
 @app.get("/items/{item_id}")

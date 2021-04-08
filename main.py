@@ -8,6 +8,7 @@ import imageio
 import numpy as np
 from typing import List, Optional
 from pydantic import BaseModel
+from CapsuleForensicsv2.test_vid_function import detect
 import dataclasses
 import json
 from pydantic.dataclasses import dataclass
@@ -16,6 +17,8 @@ import cv2
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from ensemblecnn.predict import predict_cnn
+from X2Facemaster.UnwrapMosaic.generate import generateX2face
 
 import pickle
 app = FastAPI()
@@ -53,10 +56,8 @@ def read_root():
     # # with open('test.json', 'w') as f:
     # #     json.dump({ "sourceimg": source_image, "drivevid": drive_vid, "fps": 24}, f, cls=NumpyEncoder)
     # # # print(drive_vid)
-
     # # print(drive_vid.shape)
     # generateNew(source_image, drive_vid, './result_erik6.mp4', fps)
-
     return JSONResponse(content=json.dumps([[[[0]]]]))
 
 
@@ -68,6 +69,9 @@ class GenearateObj(BaseModel):
 
 class TestObj(BaseModel):
     detectimg: List[List[int]]
+
+class TestCapObj(BaseModel):
+    detectvid: List[List[List[List[int]]]] 
 
 @app.post("/gen")
 def read_item(item: GenearateObj):
@@ -83,14 +87,57 @@ def read_item(item: GenearateObj):
     return JSONResponse(content=json.dumps(response))
 
 @app.post("/svm_test")
-def svm_test(item: TestObj):
+def svm_testf(item: TestObj):
     img = np.array(item.detectimg, dtype = "uint8")
     feature = transformFrame(img, size)
     prediction = SVM.predict(np.array([feature]))
     return JSONResponse(content=json.dumps(prediction.tolist()))
 
+@app.post("/capsule_test")
+def svm_test(item: TestCapObj):
+    # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
+    vid = np.array(item.detectvid, dtype = "uint8")
+    cls, prob = detect(vid)
+    return JSONResponse(content=json.dumps(prob))
 
+@app.post("/cnn_test")
+def svm_tesdt(item: TestCapObj):
+    # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
+    vid = np.array(item.detectvid, dtype = "uint8")
+    predict_cnn(vid, ["Xception"])
+    return JSONResponse(content=json.dumps(prob))
+
+@app.post("/x2gen")
+def x2gend(item: GenearateObj):
+    source_image = np.array(item.sourceimg, dtype = "uint8")
+    drive_vid = np.asarray(item.drivevid, dtype = "uint8")
+    fps = item.fps
+    result = generateX2face(source_image, drive_vid)
+    # print(type(result[0]))
+    response = []
+    for res in result:
+        response.append(res.tolist())
+    # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
+    return JSONResponse(content=json.dumps(response))
 
 @app.get("/items/{item_id}")
 def new(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
+
+

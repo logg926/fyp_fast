@@ -1,0 +1,1 @@
+from CapsuleForensicsv2.test_vid_function import *

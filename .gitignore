@@ -1,4 +1,5 @@
 first-order-motion-model/*
 vox-cpk.pth.tar
 ensemble-cnn/weights/*
+ensemblecnn/weights/*
 X2Face-master/release_models/*

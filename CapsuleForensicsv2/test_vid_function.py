@@ -212,7 +212,7 @@ def detect(vid):
     model = model_big.CapsuleNet(2)
     GPU = -1
     MODEL_ID = 8
-    MODEL_PATH = './Capsule-Forensics-v2/checkpoints/binary_faceforensicspp_v2_full/capsule_' + str(MODEL_ID) +'.pt'
+    MODEL_PATH = './CapsuleForensicsv2/checkpoints/binary_faceforensicspp_v2_full/capsule_' + str(MODEL_ID) +'.pt'
 
     if GPU < 0:
         # print('here')

@@ -17,7 +17,8 @@ import cv2
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from ensemble-cnn.predict import predict_cnn
+from ensemblecnn.predict import predict_cnn
+from X2Facemaster.UnwrapMosaic.generate import generateX2face
 
 import pickle
 app = FastAPI()

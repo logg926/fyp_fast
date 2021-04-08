@@ -5,14 +5,14 @@ import os
 import torch
 from PIL import Image
 from torch.autograd import Variable
-from UnwrappedFace import UnwrappedFaceWeightedAverage, UnwrappedFaceWeightedAveragePose
+from X2Facemaster.UnwrapMosaic.UnwrappedFace import UnwrappedFaceWeightedAverage, UnwrappedFaceWeightedAveragePose
 import torchvision
 from torchvision.transforms import ToTensor, Compose, Scale
 
 def run_batch(source_images, pose_images):
     return model(pose_images, *source_images)
 
-BASE_MODEL = '../release_models/' # Change to your path
+BASE_MODEL = 'X2Facemaster/release_models/' # Change to your path
 state_dict = torch.load(BASE_MODEL + 'x2face_model_forpython3.pth', map_location=torch.device('cpu'))
 
 model = UnwrappedFaceWeightedAverage(output_num_channels=2, input_num_channels=3, inner_nc=128)

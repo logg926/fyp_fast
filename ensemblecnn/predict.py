@@ -22,10 +22,10 @@ from scipy.special import expit
 # import sys
 # sys.path.append('..')
 
-from blazeface import FaceExtractor, BlazeFace, VideoReader
-from blazeface.read_video import read_frames_new
-from architectures import fornet,weights
-from isplutils import utils
+from ensemblecnn.blazeface import FaceExtractor, BlazeFace, VideoReader
+from ensemblecnn.blazeface.read_video import read_frames_new
+from ensemblecnn.architectures import fornet,weights
+from ensemblecnn.isplutils import utils
 import cv2
 
 os.system('pwd')
@@ -61,8 +61,8 @@ for m, path in zip(models_set, models_path):
 
 # load face crop library
 facedet = BlazeFace().to(device)
-facedet.load_weights("./blazeface/blazeface.pth")
-facedet.load_anchors("./blazeface/anchors.npy")
+facedet.load_weights("ensemblecnn/blazeface/blazeface.pth")
+facedet.load_anchors("ensemblecnn/blazeface/anchors.npy")
 videoreader = VideoReader(verbose=False)
 video_read_fn = lambda x: videoreader.read_frames(x, num_frames=frames_per_video)
 face_extractor = FaceExtractor(video_read_fn=video_read_fn,facedet=facedet)

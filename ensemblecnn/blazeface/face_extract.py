@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from blazeface import BlazeFace
+from ensemblecnn.blazeface import BlazeFace
 
 
 class FaceExtractor:

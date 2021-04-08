@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-from SkipNet import Pix2PixModel
-from NoSkipNet_X2Face import Pix2PixModel as NoSkipPix2PixModel
-from NoSkipNet_X2Face_pose import Pix2PixModel as NoSkipPix2PixModel_pose
+from X2Facemaster.UnwrapMosaic.SkipNet import Pix2PixModel
+from X2Facemaster.UnwrapMosaic.NoSkipNet_X2Face import Pix2PixModel as NoSkipPix2PixModel
+from X2Facemaster.UnwrapMosaic.NoSkipNet_X2Face_pose import Pix2PixModel as NoSkipPix2PixModel_pose
 import numpy as np
 
 # Generates the architecture for the network

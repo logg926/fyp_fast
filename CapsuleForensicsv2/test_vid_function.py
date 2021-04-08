@@ -15,7 +15,6 @@ from torch.autograd import Variable
 import torch.utils.data
 import torchvision.transforms as transforms
 from tqdm import tqdm
-import argparse
 from sklearn import metrics
 from PIL import Image
 import numpy as np
@@ -23,30 +22,16 @@ from scipy.optimize import brentq
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 import math
-import model_big
+import CapsuleForensicsv2.model_big
 import imageio
 from skimage.transform import resize
 # os.system("pip uninstall face_recognition")
 # import dlib
 # dlib.DLIB_USE_CUDA = False
-import face_recognition
+import CapsuleForensicsv2.face_recognition
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default ='databases/faceforensicspp/test', help='path to test dataset')
-parser.add_argument('--real', default ='0_original', help='real folder name')
-parser.add_argument('--deepfakes', default ='1_deepfakes', help='fake folder name')
-parser.add_argument('--face2face', default ='2_face2face', help='fake folder name')
-parser.add_argument('--faceswap', default ='3_faceswap', help='fake folder name')
-parser.add_argument('--batchSize', type=int, default=10, help='batch size')
-parser.add_argument('--imageSize', type=int, default=300, help='the height / width of the input image to network')
-parser.add_argument('--gpu_id', type=int, default=-1, help='GPU ID')
-parser.add_argument('--outf', default='checkpoints/binary_faceforensicspp', help='folder to output images and model checkpoints')
-parser.add_argument('--random_sample', type=int, default=0, help='number of random sample to test')
-parser.add_argument('--random', action='store_true', default=False, help='enable randomness for routing matrix')
-parser.add_argument('--id', type=int, default=21, help='checkpoint ID')
 
-opt = parser.parse_args()
-print(opt)
+
 
 img_ext_lst = ('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'gif', 'tiff')
 vid_ext_lst = ('avi', 'mkv', 'mpeg', 'mpg', 'mp4')
@@ -143,11 +128,7 @@ def classify_batch(vgg_ext, model, batch):
 
     return pred, output_pred[1]
 
-transform_fwd = transforms.Compose([
-    transforms.Resize((opt.imageSize, opt.imageSize)),
-    transforms.ToTensor(),
-    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
+
 
 def cropFace(frame, model='hog'):
     face_locations = face_recognition.face_locations(frame, model=model)
@@ -231,6 +212,29 @@ def detect(vid):
     return cls, prob
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', default ='databases/faceforensicspp/test', help='path to test dataset')
+    parser.add_argument('--real', default ='0_original', help='real folder name')
+    parser.add_argument('--deepfakes', default ='1_deepfakes', help='fake folder name')
+    parser.add_argument('--face2face', default ='2_face2face', help='fake folder name')
+    parser.add_argument('--faceswap', default ='3_faceswap', help='fake folder name')
+    parser.add_argument('--batchSize', type=int, default=10, help='batch size')
+    parser.add_argument('--imageSize', type=int, default=300, help='the height / width of the input image to network')
+    parser.add_argument('--gpu_id', type=int, default=-1, help='GPU ID')
+    parser.add_argument('--outf', default='checkpoints/binary_faceforensicspp', help='folder to output images and model checkpoints')
+    parser.add_argument('--random_sample', type=int, default=0, help='number of random sample to test')
+    parser.add_argument('--random', action='store_true', default=False, help='enable randomness for routing matrix')
+    parser.add_argument('--id', type=int, default=21, help='checkpoint ID')
+
+    opt = parser.parse_args()
+    print(opt)
+    transform_fwd = transforms.Compose([
+    transforms.Resize((opt.imageSize, opt.imageSize)),
+    transforms.ToTensor(),
+    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ])
     vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
     frames = []
     reader = vid

@@ -3,9 +3,10 @@ import numpy as np
 import torch.nn as nn
 import os
 import torch
+import imageio
 from PIL import Image
 from torch.autograd import Variable
-from X2Facemaster.UnwrapMosaic.UnwrappedFace import UnwrappedFaceWeightedAverage, UnwrappedFaceWeightedAveragePose
+from UnwrappedFaceenzo import UnwrappedFaceWeightedAverage, UnwrappedFaceWeightedAveragePose
 import torchvision
 from torchvision.transforms import ToTensor, Compose, Scale
 
@@ -64,29 +65,29 @@ def generateX2face(img, driver_imgs_array):
     return output
 
 
-if __name__ == "__main__":
-    driver_path = './examples/Taylor_Swift/1.6/nuBaabkzzzI/'
-    source_path = './examples/Taylor_Swift/1.6/vBgiDYBCuxY/'
+# if __name__ == "__main__":
+#     driver_path = './examples/Taylor_Swift/1.6/nuBaabkzzzI/'
+#     source_path = './examples/Taylor_Swift/1.6/vBgiDYBCuxY/'
 
-    driver_imgs = [driver_path + d for d in sorted(os.listdir(driver_path))][0:4] # 8 driving frames
-    # source_imgs  = [source_path + d for d in sorted(os.listdir(source_path))][0:3] # 3 source frames
-    source_imgs  = [source_path + d for d in sorted(os.listdir(source_path))][0:1] # 3 source frames
-    img = Image.open(source_imgs[0])
-    driver_imgs_array = []
-    for path in driver_imgs:
-        driver_imgs_array.append(np.array(Image.open(path)))
-    print(driver_imgs_array)
-    img = np.array(img)
+#     driver_imgs = [driver_path + d for d in sorted(os.listdir(driver_path))][0:4] # 8 driving frames
+#     # source_imgs  = [source_path + d for d in sorted(os.listdir(source_path))][0:3] # 3 source frames
+#     source_imgs  = [source_path + d for d in sorted(os.listdir(source_path))][0:1] # 3 source frames
+#     img = Image.open(source_imgs[0])
+#     driver_imgs_array = []
+#     for path in driver_imgs:
+#         driver_imgs_array.append(np.array(Image.open(path)))
+#     print(driver_imgs_array)
+#     img = np.array(img)
 
-    # print("input")
-    # print(img)
-    # print("output")
-    output = generateX2face(img, driver_imgs_array)
-    print(output)
+#     # print("input")
+#     # print(img)
+#     # print("output")
+#     output = generateX2face(img, driver_imgs_array)
+#     print(output)
 # plt.imshow(output[len(output)-1])
 
 if __name__ == "__main__":
-    source_image = numpy.array(imageio.imread('./erik.jpeg'))
+    source_image = np.array(imageio.imread('./erik.jpeg'))
     # print(source_image)
     reader = imageio.get_reader('./damedaneshort.mp4')
     fps = reader.get_meta_data()['fps']
@@ -100,5 +101,6 @@ if __name__ == "__main__":
     reader.close()
 
     driver_imgs = drive_vid
-    source_imgs=[source_image]
-    output = generateX2face(img, driver_imgs_array)
+    # source_imgs=source_image
+    output = generateX2face(source_image, driver_imgs)
+    print(output)

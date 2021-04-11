@@ -103,4 +103,9 @@ if __name__ == "__main__":
     driver_imgs = drive_vid
     # source_imgs=source_image
     output = generateX2face(source_image, driver_imgs)
+    # enzo please change this line
+    tooutput = output
+    
+    fps=15
+    imageio.mimsave('./result_newwwenzo.mp4', tooutput, fps=fps)
     print(output)

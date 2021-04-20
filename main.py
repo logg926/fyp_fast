@@ -75,16 +75,21 @@ class TestCapObj(BaseModel):
 
 @app.post("/gen")
 def read_item(item: GenearateObj):
+
     source_image = np.array(item.sourceimg, dtype = "uint8")
     drive_vid = np.asarray(item.drivevid, dtype = "uint8")
     fps = item.fps
-    result = generateNew(source_image, drive_vid, './result_erik5.mp4', fps)
-    print(type(result[0]))
+    result = generateNew(source_image, drive_vid, './heretemp.mp4', fps)
+    # print(type(result[0]))
+    # print("result")
+    # print(result)
     response = []
     for res in result:
         response.append(res.tolist())
     # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
+    # print(response)
     return JSONResponse(content=json.dumps(response))
+    # return JSONResponse(content=json.dumps("hi"))
 
 @app.post("/svm_test")
 def svm_testf(item: TestObj):
@@ -121,6 +126,21 @@ def svm_tesdt(item: TestCapObj):
     # reader.close()
     vid = np.array(item.detectvid, dtype = "uint8")
     predict_cnn(vid, ["Xception"])
+    return JSONResponse(content=json.dumps(prob))
+
+@app.post("/ensemble_test")
+def svm_tesdt(item: TestCapObj):
+    # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
+    # frames = []
+    # reader = vid
+    # try:
+    #     for im in reader:
+    #         frames.append(im)
+    # except RuntimeError:
+    #     pass
+    # reader.close()
+    vid = np.array(item.detectvid, dtype = "uint8")
+    predict_cnn(vid, ['Xception', 'EfficientNetB4', 'EfficientNetB4ST', 'EfficientNetAutoAttB4', 'EfficientNetAutoAttB4ST'])
     return JSONResponse(content=json.dumps(prob))
 
 @app.post("/x2gen")

@@ -166,8 +166,8 @@ def generateNew(source_image, drive_vid, result_video, fps):
         predictions = predictions_backward[::-1] + predictions_forward[1:]
     else:
         predictions = make_animation(source_img, driving_vid, generator, kp_detector, relative=RELATIVE, adapt_movement_scale=ADAPT_SCALE, cpu=CPU)
+    imageio.mimsave(result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
     return [img_as_ubyte(frame) for frame in predictions]
-    # imageio.mimsave(result_video, [img_as_ubyte(frame) for frame in predictions], fps=fps)
 
 # if __name__ == "__main__":
 #     source_image = numpy.array(imageio.imread('./erik.jpeg'))

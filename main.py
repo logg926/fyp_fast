@@ -72,7 +72,7 @@ class TestObj(BaseModel):
 
 class TestCapObj(BaseModel):
     detectvid: List[List[List[List[int]]]] 
-
+import uuid
 @app.post("/gen")
 def read_item(item: GenearateObj):
 
@@ -86,9 +86,12 @@ def read_item(item: GenearateObj):
     response = []
     for res in result:
         response.append(res.tolist())
-    # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
+    
+    filename = str(uuid.uuid4())
+    url = 'static/'+filename+'.mp4'
+    imageio.mimsave('./'+url, result, fps=fps)
     # print(response)
-    return JSONResponse(content=json.dumps(response))
+    return url
     # return JSONResponse(content=json.dumps("hi"))
 
 @app.post("/svm_test")
@@ -154,10 +157,15 @@ def x2gend(item: GenearateObj):
     for res in result:
         response.append(res.tolist())
     # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
-    return JSONResponse(content=json.dumps(response))
+
+    url = 'static/'+filename+'.mp4'
+    imageio.mimsave('./'+url, result, fps=fps)
+    return url
 
 @app.get("/items/{item_id}")
 def new(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
 
 
+from starlette.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory="static"))

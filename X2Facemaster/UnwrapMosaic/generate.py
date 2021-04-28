@@ -39,7 +39,7 @@ def generateX2face(img, driver_imgs_array):
     source_images = []
     # for img in source_imgs:
     #     source_images.append(load_img(img).unsqueeze(0).repeat(len(driver_imgs), 1, 1, 1))
-    source_images.append(load_img_from_array(img).unsqueeze(0).repeat(len(driver_imgs), 1, 1, 1))
+    source_images.append(load_img_from_array(img).unsqueeze(0).repeat(len(driver_imgs_array), 1, 1, 1))
     driver_images = None
     for img in driver_imgs_array:
         if driver_images is None:

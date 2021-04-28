@@ -1,6 +1,6 @@
 
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Form 
 from fastapi.middleware.cors import CORSMiddleware
 from generate import generateNew 
 from testfrequencydomain import transformFrame
@@ -19,7 +19,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from ensemblecnn.predict import predict_cnn
 from X2Facemaster.UnwrapMosaic.generate import generateX2face
-
 import pickle
 app = FastAPI()
 
@@ -78,6 +77,8 @@ def read_item(item: GenearateObj):
 
     source_image = np.array(item.sourceimg, dtype = "uint8")
     drive_vid = np.asarray(item.drivevid, dtype = "uint8")
+    # imageio.mimsave('./'+"testing.mp4", drive_vid, fps=15)
+    imageio.imsave('./'+"testing2.jpg", source_image)
     fps = item.fps
     result = generateNew(source_image, drive_vid, './heretemp.mp4', fps)
     # print(type(result[0]))
@@ -151,13 +152,15 @@ def x2gend(item: GenearateObj):
     source_image = np.array(item.sourceimg, dtype = "uint8")
     drive_vid = np.asarray(item.drivevid, dtype = "uint8")
     fps = item.fps
-    result = generateX2face(source_image, drive_vid)
+
+    driver_imgs = drive_vid
+    result = generateX2face(source_image, driver_imgs)
     # print(type(result[0]))
     response = []
     for res in result:
         response.append(res.tolist())
     # imageio.mimsave('./result_erik5.mp4', result, fps=fps)
-
+    filename = str(uuid.uuid4())
     url = 'static/'+filename+'.mp4'
     imageio.mimsave('./'+url, result, fps=fps)
     return url

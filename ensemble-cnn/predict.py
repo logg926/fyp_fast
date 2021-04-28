@@ -22,11 +22,6 @@ from scipy.special import expit
 # import sys
 # sys.path.append('..')
 
-# from ensemblecnn.blazeface import FaceExtractor, BlazeFace, VideoReader
-# from ensemblecnn.blazeface.read_video import read_frames_new
-# from ensemblecnn.architectures import fornet,weights
-# from ensemblecnn.isplutils import utils
-
 from blazeface import FaceExtractor, BlazeFace, VideoReader
 from blazeface.read_video import read_frames_new
 from architectures import fornet,weights
@@ -54,31 +49,29 @@ frames_per_video = 32
 models = []
 for m, path in zip(models_set, models_path):
     try:
-        with open("ensemblecnn/"+path, 'rb') as f:
+        with open(path, 'rb') as f:
             net = torch.load(f) if torch.cuda.is_available() else torch.load(f, map_location=torch.device('cpu'))
             # print(type(net['net']))
             model = getattr(fornet, m)().eval().to(device)
             model.load_state_dict(net['net'])
             models.append(model)
     except:
-        print('cannot load', path)
-        raise Exception("Cannot find weight, enzo please download in google drive")
+        # print('cannot load', path)
         models.append('')
 
 # load face crop library
 facedet = BlazeFace().to(device)
-facedet.load_weights("ensemblecnn/blazeface/blazeface.pth")
-facedet.load_anchors("ensemblecnn/blazeface/anchors.npy")
+facedet.load_weights("./blazeface/blazeface.pth")
+facedet.load_anchors("./blazeface/anchors.npy")
 videoreader = VideoReader(verbose=False)
-# video_read_fn = lambda x: videoreader.read_frames(x, num_frames=frames_per_video)
-video_read_fn = lambda x: read_frames_new(x, num_frames=frames_per_video)
+video_read_fn = lambda x: videoreader.read_frames(x, num_frames=frames_per_video)
 face_extractor = FaceExtractor(video_read_fn=video_read_fn,facedet=facedet)
 
 # load transformer
 Xception_transf = utils.get_transformer(face_policy, face_size, models[0].get_normalizer(), train=False) if models[0] else ''
 transf = utils.get_transformer(face_policy, face_size, models[1].get_normalizer(), train=False) if models[1] else ''
 
-# print()
+
 # def process_videos(self, input_dir, filenames, video_idxs):
 #     target_size = self.facedet.input_size
 
@@ -184,7 +177,7 @@ def predict(pathToVid, testOnModels=[]):
 
     result = read_frames_new(video_path, num_frames=frames_per_video)
     print(result) 
-    faces = face_extractor.process_videos( facedet, video_read_fn, result)
+    faces = face_extractor.process_videos(input_dir, filenames, facedet, video_read_fn, result)
     # print (faces)
     # faces = face_extractor.process_video(pathToVid)
     
@@ -196,6 +189,7 @@ def predict(pathToVid, testOnModels=[]):
         if index > 0:
             faces_t = torch.stack( [ transf(image=frame['faces'][0])['image'] for frame in faces if len(frame['faces']) ] )
         else:
+            print(faces[0])
             faces_t = torch.stack( [ Xception_transf(image=frame['faces'][0])['image'] for frame in faces if len(frame['faces']) ] )
         with torch.no_grad():
             if models[index]:
@@ -209,7 +203,7 @@ def predict(pathToVid, testOnModels=[]):
 
 
 
-def predict_cnn(vid, testOnModels=[]):
+def predict_cnn(result, testOnModels=[]):
     # faces = ''
     # input_dir = os.path.dirname(pathToVid)
     # filenames = [os.path.basename(pathToVid)]
@@ -225,9 +219,7 @@ def predict_cnn(vid, testOnModels=[]):
 
     # result = read_frames_new(video_path, num_frames=frames_per_video)
     # print(result) 
-    
-    result = read_frames_new(vid, num_frames=frames_per_video)
-    faces = face_extractor.process_videos( facedet, video_read_fn, result)
+    faces = face_extractor.process_videos(input_dir, filenames, facedet, video_read_fn, result)
     # print (faces)
     # faces = face_extractor.process_video(pathToVid)
     
@@ -260,6 +252,4 @@ if __name__ == '__main__':
     # modelsToEval = args.modelsToEval.split(',')
     # print('Evaluating models:', modelsToEval)
     # print(predict(args.path, modelsToEval))
-    # print(video_read_fn("test_dataset/real/sqqamveljk.mp4"))
-    # video_read_fn("test_dataset/real/sqqamveljk.mp4")
-    print(predict_cnn("test_dataset/real/sqqamveljk.mp4", ["Xception"]))
+    print(predict("../test_dataset/real/sqqamveljk.mp4", ["Xception"]))

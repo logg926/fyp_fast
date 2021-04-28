@@ -227,7 +227,10 @@ def read_frames_new( path, num_frames, jitter=0, seed=None):
             frame_idxs = np.clip(frame_idxs + jitter_offsets, 0, frame_count - 1)
 
         # result = self._read_frames_at_indices(path, capture, frame_idxs)
-        result = _read_frames_at_indices_new(path, capture, frame_idxs)
+        # print(path, capture, frame_idxs)
+        print(frame_idxs)
+        result= _read_frames_at_indices_new(path, capture, frame_idxs)
+        # print(hi)
         capture.release()
         return result
 def _read_frames_at_indices_new( path, capture, frame_idxs):
@@ -238,9 +241,6 @@ def _read_frames_at_indices_new( path, capture, frame_idxs):
         for frame_idx in range(frame_idxs[0], frame_idxs[-1] + 1):
             # Get the next frame, but don't decode if we're not using it.
             ret = capture.grab()
-            print("#hello")
-            print(ret)
-            print("#")
             if not ret:
                 if verbose:
                     print("Error grabbing frame %d from movie %s" % (frame_idx, path))

@@ -129,11 +129,16 @@ def svm_tesdt(item: TestCapObj):
     #     pass
     # reader.close()
     vid = np.array(item.detectvid, dtype = "uint8")
-    predict_cnn(vid, ["Xception"])
+
+    filename = str(uuid.uuid4())
+    place = './tempvid/'+filename+'.mp4'
+    imageio.mimsave(place, vid, fps=15)
+
+    predict_cnn(place, ["Xception"])
     return JSONResponse(content=json.dumps(prob))
 
 @app.post("/ensemble_test")
-def svm_tesdt(item: TestCapObj):
+def svm_tesdte(item: TestCapObj):
     # vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
     # frames = []
     # reader = vid
@@ -144,7 +149,12 @@ def svm_tesdt(item: TestCapObj):
     #     pass
     # reader.close()
     vid = np.array(item.detectvid, dtype = "uint8")
-    predict_cnn(vid, ['Xception', 'EfficientNetB4', 'EfficientNetB4ST', 'EfficientNetAutoAttB4', 'EfficientNetAutoAttB4ST'])
+
+    filename = str(uuid.uuid4())
+    place = './tempvid/'+filename+'.mp4'
+    imageio.mimsave(place, vid, fps=15)
+
+    predict_cnn(place, ['Xception', 'EfficientNetB4', 'EfficientNetB4ST', 'EfficientNetAutoAttB4', 'EfficientNetAutoAttB4ST'])
     return JSONResponse(content=json.dumps(prob))
 
 @app.post("/x2gen")

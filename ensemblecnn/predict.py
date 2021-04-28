@@ -22,10 +22,15 @@ from scipy.special import expit
 # import sys
 # sys.path.append('..')
 
-from ensemblecnn.blazeface import FaceExtractor, BlazeFace, VideoReader
-from ensemblecnn.blazeface.read_video import read_frames_new
-from ensemblecnn.architectures import fornet,weights
-from ensemblecnn.isplutils import utils
+# from ensemblecnn.blazeface import FaceExtractor, BlazeFace, VideoReader
+# from ensemblecnn.blazeface.read_video import read_frames_new
+# from ensemblecnn.architectures import fornet,weights
+# from ensemblecnn.isplutils import utils
+
+from blazeface import FaceExtractor, BlazeFace, VideoReader
+from blazeface.read_video import read_frames_new
+from architectures import fornet,weights
+from isplutils import utils
 import cv2
 
 os.system('pwd')
@@ -64,7 +69,8 @@ facedet = BlazeFace().to(device)
 facedet.load_weights("ensemblecnn/blazeface/blazeface.pth")
 facedet.load_anchors("ensemblecnn/blazeface/anchors.npy")
 videoreader = VideoReader(verbose=False)
-video_read_fn = lambda x: videoreader.read_frames(x, num_frames=frames_per_video)
+# video_read_fn = lambda x: videoreader.read_frames(x, num_frames=frames_per_video)
+video_read_fn = lambda x: read_frames_new(x, num_frames=frames_per_video)
 face_extractor = FaceExtractor(video_read_fn=video_read_fn,facedet=facedet)
 
 # load transformer
@@ -177,7 +183,7 @@ def predict(pathToVid, testOnModels=[]):
 
     result = read_frames_new(video_path, num_frames=frames_per_video)
     print(result) 
-    faces = face_extractor.process_videos(input_dir, filenames, facedet, video_read_fn, result)
+    faces = face_extractor.process_videos( facedet, video_read_fn, result)
     # print (faces)
     # faces = face_extractor.process_video(pathToVid)
     
@@ -202,7 +208,7 @@ def predict(pathToVid, testOnModels=[]):
 
 
 
-def predict_cnn(result, testOnModels=[]):
+def predict_cnn(vid, testOnModels=[]):
     # faces = ''
     # input_dir = os.path.dirname(pathToVid)
     # filenames = [os.path.basename(pathToVid)]
@@ -218,6 +224,8 @@ def predict_cnn(result, testOnModels=[]):
 
     # result = read_frames_new(video_path, num_frames=frames_per_video)
     # print(result) 
+    
+    result = read_frames_new(vid, num_frames=frames_per_video)
     faces = face_extractor.process_videos( facedet, video_read_fn, result)
     # print (faces)
     # faces = face_extractor.process_video(pathToVid)
@@ -251,4 +259,6 @@ if __name__ == '__main__':
     # modelsToEval = args.modelsToEval.split(',')
     # print('Evaluating models:', modelsToEval)
     # print(predict(args.path, modelsToEval))
-    print(predict("../test_dataset/real/sqqamveljk.mp4", ["Xception"]))
+    # print(video_read_fn("test_dataset/real/sqqamveljk.mp4"))
+    # video_read_fn("test_dataset/real/sqqamveljk.mp4")
+    print(predict("test_dataset/real/sqqamveljk.mp4", ["Xception"]))

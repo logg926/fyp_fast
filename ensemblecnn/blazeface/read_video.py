@@ -238,6 +238,9 @@ def _read_frames_at_indices_new( path, capture, frame_idxs):
         for frame_idx in range(frame_idxs[0], frame_idxs[-1] + 1):
             # Get the next frame, but don't decode if we're not using it.
             ret = capture.grab()
+            print("#hello")
+            print(ret)
+            print("#")
             if not ret:
                 if verbose:
                     print("Error grabbing frame %d from movie %s" % (frame_idx, path))

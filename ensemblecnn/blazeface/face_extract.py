@@ -129,7 +129,7 @@ class FaceExtractor:
         return videos_read, frames_read,frames,tiles,resize_info
 
 
-    def process_videos(self, input_dir, filenames, facedet, video_read_fn,result) -> List[dict]:
+    def process_videos(self,   facedet, video_read_fn,result) -> List[dict]:
         target_size = facedet.input_size
 
         videos_read = []

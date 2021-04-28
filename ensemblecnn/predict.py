@@ -218,7 +218,7 @@ def predict_cnn(result, testOnModels=[]):
 
     # result = read_frames_new(video_path, num_frames=frames_per_video)
     # print(result) 
-    faces = face_extractor.process_videos(input_dir, filenames, facedet, video_read_fn, result)
+    faces = face_extractor.process_videos( facedet, video_read_fn, result)
     # print (faces)
     # faces = face_extractor.process_video(pathToVid)
     

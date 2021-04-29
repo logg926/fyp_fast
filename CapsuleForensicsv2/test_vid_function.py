@@ -137,9 +137,7 @@ def classify_batch(vgg_ext, model, batch):
 
 def cropFace(frame, model='hog'):
     face_locations = face_recognition.face_locations(frame, model=model)
-    print(face_locations)
-    print (frame)
-    print(CapsuleForensicsv2)
+
     if len(face_locations) > 0:
         if len(face_locations) > 1:
             face_locations = sorted(face_locations, key=lambda loc: (loc[2]-loc[0]) * (loc[1]-loc[3]), reverse=True)[0]

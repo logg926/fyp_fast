@@ -22,13 +22,19 @@ from scipy.optimize import brentq
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 import math
-import CapsuleForensicsv2.model_big
 import imageio
 from skimage.transform import resize
 # os.system("pip uninstall face_recognition")
 # import dlib
 # dlib.DLIB_USE_CUDA = False
-import CapsuleForensicsv2.face_recognition
+# import CapsuleForensicsv2.face_recognition as face_recognition
+
+# import CapsuleForensicsv2.model_big as model_big
+
+
+import face_recognition as face_recognition
+
+import model_big as model_big
 
 
 
@@ -69,35 +75,34 @@ def process_file_list(file_lst, sep_char='_'):
 
 def classify_batch(vgg_ext, model, batch):
     n_sub_imgs = len(batch)
-
-    if (opt.random_sample > 0):
-        if n_sub_imgs > opt.random_sample:
+    if (0 > 0):
+        if n_sub_imgs > 0:
             np.random.shuffle(batch)
-            n_sub_imgs = opt.random_sample
+            n_sub_imgs = 0
 
-        img_tmp = torch.FloatTensor([]).view(0, 3, opt.imageSize, opt.imageSize)
+        img_tmp = torch.FloatTensor([]).view(0, 3, 300, 300)
 
         for i in range(n_sub_imgs):
             img_tmp = torch.cat((img_tmp, batch[i]), dim=0)
 
-        if opt.gpu_id > 0:
-            img_tmp = img_tmp.cuda(opt.gpu_id)
+        if -1 > 0:
+            img_tmp = img_tmp.cuda(-1)
 
         input_v = Variable(img_tmp, requires_grad = False)
 
         x = vgg_ext(input_v)
-        classes, class_ = model(x, random=opt.random)
+        classes, class_ = model(x, random=False)
         output_pred = class_.data.cpu().numpy()
 
     else:
-        batchSize = opt.batchSize
+        batchSize = 10
         steps = int(math.ceil(n_sub_imgs*1.0/batchSize))
 
         output_pred = np.array([], dtype=np.float).reshape(0,2)
 
         for i in range(steps):
 
-            img_tmp = torch.FloatTensor([]).view(0, 3, opt.imageSize, opt.imageSize)
+            img_tmp = torch.FloatTensor([]).view(0, 3, 300, 300)
 
             end = (i + 1)*batchSize
             if end > n_sub_imgs:
@@ -108,13 +113,13 @@ def classify_batch(vgg_ext, model, batch):
             for j in range(end):
                 img_tmp = torch.cat((img_tmp, batch[i*batchSize + j]), dim=0)
 
-            if opt.gpu_id > 0:
-                img_tmp = img_tmp.cuda(opt.gpu_id)
+            if -1 > 0:
+                img_tmp = img_tmp.cuda(-1)
 
             input_v = Variable(img_tmp, requires_grad = False)
 
             x = vgg_ext(input_v)
-            classes, class_ = model(x, random=opt.random)
+            classes, class_ = model(x, random=False)
             output_p = class_.data.cpu().numpy()
 
             output_pred = np.concatenate((output_pred, output_p), axis=0)
@@ -167,8 +172,9 @@ def classify_frames(vgg_ext, model, vid):
     # reader.close()
 
     frames = vid
-
-    frames = [transform_fwd(Image.fromarray(cropFace(f))).unsqueeze(0) for f in frames]
+    # print(Image.fromarray(cropFace(frames[0])))
+    # print(Image.fromarray(cropFace(frames[0])))
+    frames = [transform_fwd(Image.fromarray((cropFace(f)* 255).astype(np.uint8))).unsqueeze(0) for f in frames]
     return classify_batch(vgg_ext, model, frames)
     # if not vid:
     #     # place holder logic for testing with detect dataset, reset to throw error in production
@@ -189,6 +195,8 @@ def classify_frames(vgg_ext, model, vid):
     #     return classify_batch(vgg_ext, model, frames)
 
 def detect(vid):
+    # vgg_ext = CapsuleForensicsv2.model_big.VggExtractor()
+    # model = CapsuleForensicsv2.model_big.CapsuleNet(2)
     vgg_ext = model_big.VggExtractor()
     model = model_big.CapsuleNet(2)
     GPU = -1
@@ -212,34 +220,39 @@ def detect(vid):
     return cls, prob
 
 transform_fwd = transforms.Compose([
-    transforms.Resize((300, 10)),
+    transforms.Resize((300, 300)),
     transforms.ToTensor(),
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 if __name__ == '__main__':
-    import argparse
+    # import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default ='databases/faceforensicspp/test', help='path to test dataset')
-    parser.add_argument('--real', default ='0_original', help='real folder name')
-    parser.add_argument('--deepfakes', default ='1_deepfakes', help='fake folder name')
-    parser.add_argument('--face2face', default ='2_face2face', help='fake folder name')
-    parser.add_argument('--faceswap', default ='3_faceswap', help='fake folder name')
-    parser.add_argument('--batchSize', type=int, default=10, help='batch size')
-    parser.add_argument('--imageSize', type=int, default=300, help='the height / width of the input image to network')
-    parser.add_argument('--gpu_id', type=int, default=-1, help='GPU ID')
-    parser.add_argument('--outf', default='checkpoints/binary_faceforensicspp', help='folder to output images and model checkpoints')
-    parser.add_argument('--random_sample', type=int, default=0, help='number of random sample to test')
-    parser.add_argument('--random', action='store_true', default=False, help='enable randomness for routing matrix')
-    parser.add_argument('--id', type=int, default=21, help='checkpoint ID')
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--dataset', default ='databases/faceforensicspp/test', help='path to test dataset')
+    # parser.add_argument('--real', default ='0_original', help='real folder name')
+    # parser.add_argument('--deepfakes', default ='1_deepfakes', help='fake folder name')
+    # parser.add_argument('--face2face', default ='2_face2face', help='fake folder name')
+    # parser.add_argument('--faceswap', default ='3_faceswap', help='fake folder name')
+    # parser.add_argument('--batchSize', type=int, default=10, help='batch size')
+    # parser.add_argument('--imageSize', type=int, default=300, help='the height / width of the input image to network')
+    # parser.add_argument('--gpu_id', type=int, default=-1, help='GPU ID')
+    # parser.add_argument('--outf', default='checkpoints/binary_faceforensicspp', help='folder to output images and model checkpoints')
+    # parser.add_argument('--random_sample', type=int, default=0, help='number of random sample to test')
+    # parser.add_argument('--random', action='store_true', default=False, help='enable randomness for routing matrix')
+    # parser.add_argument('--id', type=int, default=21, help='checkpoint ID')
 
-    opt = parser.parse_args()
-    print(opt)
-    transform_fwd = transforms.Compose([
-    transforms.Resize((opt.imageSize, opt.imageSize)),
-    transforms.ToTensor(),
-    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
+    # opt = parser.parse_args()
+    # print(opt)
+    # transform_fwd = transforms.Compose([
+    # transforms.Resize((opt.imageSize, opt.imageSize)),
+    # transforms.ToTensor(),
+    # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    # ])
+    # transform_fwd = transforms.Compose([
+    # transforms.Resize((300, 300)),
+    # transforms.ToTensor(),
+    # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    # ])
     vid = imageio.get_reader('./test_dataset/real/sqqamveljk.mp4', fps=5)
     frames = []
     reader = vid

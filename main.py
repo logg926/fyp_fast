@@ -88,7 +88,7 @@ def svm_tesdt(item: TestCapObj):
     place = './tempvid/'+filename+'.mp4'
     imageio.mimsave(place, vid, fps=15)
 
-    predict_cnn(place, ["Xception"])
+    prob = predict_cnn(place, ["Xception"])
     return JSONResponse(content=json.dumps(prob))
 
 
@@ -100,7 +100,7 @@ def svm_tesdte(item: TestCapObj):
     place = './tempvid/'+filename+'.mp4'
     imageio.mimsave(place, vid, fps=15)
 
-    predict_cnn(place, ['Xception', 'EfficientNetB4', 'EfficientNetB4ST',
+    prob = predict_cnn(place, ['Xception', 'EfficientNetB4', 'EfficientNetB4ST',
                 'EfficientNetAutoAttB4', 'EfficientNetAutoAttB4ST'])
     return JSONResponse(content=json.dumps(prob))
 

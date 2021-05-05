@@ -1,19 +1,13 @@
 # fyp_fast
 
-to run
+To run the backend server,
 
 ```sh
 uvicorn main:app --reload
 ```
 
-Source image /erik.jpeg should be
+On Linux,
 
-[[[ 71 80 75]
-[ 71 80 75]
-[ 73 82 77]
-
-Driving vid /damedaneshort.mp4
-
-[Array([[[135, 116, 89],
-[135, 116, 89],
-[135, 116, 89],
+```sh
+python3 -m uvicorn main:app --reload
+```

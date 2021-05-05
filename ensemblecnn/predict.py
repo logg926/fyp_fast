@@ -248,7 +248,7 @@ def predict_cnn(vid, testOnModels=[]):
             else: print('models ' + m + 'is empty')
     # score closer to 0 means its real, closer to 1 means fake
     avg_score = sum(scores) / len(scores) if scores else -1
-    return 'Real' if avg_score < 0.5 else 'Fake', avg_score
+    return 0 if avg_score < 0.5 else 1, avg_score
 
 if __name__ == '__main__':
     
